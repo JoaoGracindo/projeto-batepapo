@@ -29,72 +29,93 @@ let db;
 let participants;
 let messages;
 
-mongoClient.connect().then(() => {
+try {
+    await mongoClient.connect();
     db = mongoClient.db("uol")
     participants = db.collection("participants")
     messages = db.collection("messages")
-})
 
-app.post("/participants", (req, res) => {
-    const {name} = req.body
+} catch (err) {
+    console.log(err)
+}
 
-    participants.insertOne({name, lastStatus: Date.now()}).then(() => {
+
+app.post("/participants", async (req, res) => {
+    const {name} = req.body;
+
+
+    try {
+        await participants.insertOne({name, lastStatus: Date.now()});
         res.status(201)
-    })
+    
+    } catch (err) {
+        console.log(err)
+    }
 })
 
 
-app.get("/participants", ( (req, res) => {
-    participants.find().toArray().then((participants) => {
-        res.send(participants)
-    })
-    .catch((err) => {
+app.get("/participants", ( async (req, res) => {
+
+    try {
+        const participants = await participants.find().toArray();
+        res.status(201).send(participants)
+    
+    } catch (err) {
         console.log(err)
-    })
+    }
 }))
 
 
 
-app.post("/messages", ((req, res) => {
+app.post("/messages", (async (req, res) => {
 
     const {to, text, type} = req.body;
 
     const user = req.headers.user;
 
-    messages.insertOne({from: user, to, text, type, time: now.format("HH:MM:SS")}).then(() => {
+
+    try {
+        await messages.insertOne({from: user, to, text, type, time: now.format("HH:MM:SS")});
         res.status(201)
-    })
-}))
-
-
-
-app.get("/messages", ((req, res) => {
-
-    const user = req.headers.user;
-
-    messages.find({to: user}).toArray().then((messages) => {
-        res.send(messages)
-    })
-    .catch((err) => {
+    
+    } catch (err) {
         console.log(err)
-    })
+    }
+
 }))
 
 
 
-app.post("/status", ((req, res) => {
+app.get("/messages", (async (req, res) => {
+
     const user = req.headers.user;
 
-    participants.findOne({name: user}).then((object) => {
-        if(!object){
+    try {
+        const messages = await messages.find({to: user}).toArray();
+        res.status(201).send(messages)
+    
+    } catch (err) {
+        console.log(err)
+    }
+}))
+
+
+
+app.post("/status", (async (req, res) => {
+    const user = req.headers.user;
+
+    try {
+        const participant = await participants.findOne({name: user});
+        if(!participant){
             res.status(404);
             return
         }
         object.lastStatus = Date.now();
         res.status(200)
-    }).catch((err) => {
+    
+    } catch (err) {
         console.log(err)
-    })
+    }
 }))
 
 
