@@ -107,11 +107,11 @@ app.post("/messages", (async (req, res) => {
 app.get("/messages", (async (req, res) => {
 
     const {user} = req.headers;
-    const {limit} = req.query;
+    const limit = parseInt(req.query.limit);
 
     try {
         let response = await messages
-                                      .find({$or: [{to:user}, {from: user}, {to:"Todos"}, {type: "status"}]})
+                                      .find({$or: [{to:user}, {from: user}, {to:"Todos"}]})
                                       .sort({time: -1})
                                       .toArray();
         if(limit){
@@ -143,9 +143,12 @@ app.post("/status", (async (req, res) => {
             {$set:{lastStatus: Date.now()}
         })
         res.status(200)
+        return
     
     } catch (err) {
         console.log(err)
+        res.sendStatus(500)
+        return
     }
 }))
 
