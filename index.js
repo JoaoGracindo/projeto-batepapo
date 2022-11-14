@@ -111,7 +111,7 @@ app.get("/messages", (async (req, res) => {
 
     try {
         let response = await messages
-                                      .find()
+                                      .find({$or: [{to:user}, {from: user}, {to:"Todos"}, {type: "status"}]})
                                       .sort({time: -1})
                                       .toArray();
         if(limit){
