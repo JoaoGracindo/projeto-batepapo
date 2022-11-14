@@ -150,8 +150,7 @@ app.post("/status", (async (req, res) => {
 }))
 
 
-
- setInterval(15000,async () => {
+async function invalidUsersRemoval(){
     try{
         const allParticipants = await participants.find().toArray();
         const expiredParticipants = allParticipants.filter((object) => Date.now() > object.lastStatus + 15000)
@@ -169,7 +168,10 @@ app.post("/status", (async (req, res) => {
         console.log(err);
     }
 
- })
+ }
+
+
+ setInterval(invalidUsersRemoval,15000)
 
 
 app.listen(5000, () => console.log("Server running in port 5000..."))
